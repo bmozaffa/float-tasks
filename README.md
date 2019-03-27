@@ -1,8 +1,8 @@
 # Google Apps Script Task Floating
 ## Description
 These scripts run on your google account under your own authorization, and can be scheduled or run manually to manage your Google Tasks. Specifically, when run:
-1- Any Google Tasks due before the current date are updated so that their due date is set to the next day
-2- Any Google Tasks marked as completed are removed, and instead a calendar entry is created on the date and time when the task was marked as completed.
+1. Any Google Tasks due before the current date are updated so that their due date is set to the next day
+2. Any Google Tasks marked as completed are removed, and instead a calendar entry is created on the date and time when the task was marked as completed.
 
 ## Setup
 Navigate to https://script.google.com/ and after accepting the prompts, use the + sign on the top-left to create a 'New script'. Give the project a name, for example "Float Tasks". The file will be called Code.gs by default and have an empty function in there. Replace the content of the file with the provided Code.gs file.
