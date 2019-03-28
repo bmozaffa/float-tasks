@@ -1,16 +1,16 @@
 function advanceTasks() {
   var taskLists = getTaskLists();
   for (i = 0; i < taskLists.length; i++) {
-    Logger.log("Found task list " + taskLists[i].name);
+    console.log('Found task list called %s', taskLists[i].name);
     overdueTasks = getOverdueTasks(taskLists[i].id);
-    Logger.log("Overdue tasks: " + overdueTasks.length);
+    console.info("Found %d overdue tasks", overdueTasks.length);
     for (j = 0; j < overdueTasks.length; j++) {
       advanceTask(taskLists[i].id, overdueTasks[j].id);
     }
     completedTasks = getCompletedTasks(taskLists[i].id);
-    Logger.log("Completed tasks: " + completedTasks.length);
+    console.info("Found %d completed tasks", completedTasks.length);
     for (j = 0; j < completedTasks.length; j++) {
-      Logger.log(completedTasks[j].title);
+      console.log("Found completed task called %s", completedTasks[j].title);
       if (addCalendarEvent( completedTasks[j].title, completedTasks[j].notes, completedTasks[j].completed )) {
         deleteTask(taskLists[i].id, completedTasks[j].id);
       }
@@ -55,13 +55,13 @@ function getOverdueTasks(listId) {
 
 function advanceTask(taskListId, taskId) {
   task = Tasks.Tasks.get(taskListId, taskId);
-  Logger.log("Advance task: " + task.title + " due at " + task.due);
   dueDate = new Date(task.due);
+  console.log("Advancing task %s due at %s", task.title, dueDate);
   now = new Date();
   while( dueDate < now ) {
     dueDate.setDate( dueDate.getDate() + 1 );
   }
-  Logger.log("Will now be due at " + dueDate);
+  console.log("Task will now be due at %s", dueDate);
   task.due = formatDate(dueDate);
   Tasks.Tasks.update(task, taskListId, taskId)
 }
