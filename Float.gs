@@ -33,7 +33,7 @@ function getTaskLists() {
 
 function getOverdueTasks(listId) {
   var params = {
-    dueMax: formatDate(new Date()),
+    dueMax: formatDate(getToday()),
     showCompleted: false,
     showDeleted: false
   };
@@ -57,13 +57,18 @@ function advanceTask(taskListId, taskId) {
   task = Tasks.Tasks.get(taskListId, taskId);
   dueDate = new Date(task.due);
   console.log("Advancing task %s due at %s", task.title, dueDate);
-  now = new Date();
-  while( dueDate < now ) {
+  while( dueDate < getToday() ) {
     dueDate.setDate( dueDate.getDate() + 1 );
   }
   console.log("Task will now be due at %s", dueDate);
   task.due = formatDate(dueDate);
   Tasks.Tasks.update(task, taskListId, taskId)
+}
+
+function getToday() {
+  var today = new Date();
+  today.setDate(today.getDate()-1);
+  return today;
 }
 
 function getCompletedTasks(listId) {
@@ -123,4 +128,3 @@ function deleteTask(taskListId, taskId) {
 function formatDate(date) {
   return Utilities.formatDate(date, 'UTC', 'yyyy-MM-dd\'T\'HH:mm:ssZ');
 }
-
