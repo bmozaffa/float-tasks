@@ -1,18 +1,19 @@
 function advanceTasks() {
   var taskLists = getTaskLists();
   for (i = 0; i < taskLists.length; i++) {
-    console.log('Found task list called %s', taskLists[i].name);
-    overdueTasks = getOverdueTasks(taskLists[i].id);
+    taskList = taskLists[i];
+    console.log('Found task list called %s', taskList.name);
+    overdueTasks = getOverdueTasks(taskList.id);
     console.info("Found %d overdue tasks", overdueTasks.length);
     for (j = 0; j < overdueTasks.length; j++) {
-      advanceTask(taskLists[i].id, overdueTasks[j].id);
+      advanceTask(taskList.id, overdueTasks[j].id);
     }
-    completedTasks = getCompletedTasks(taskLists[i].id);
+    completedTasks = getCompletedTasks(taskList.id);
     console.info("Found %d completed tasks", completedTasks.length);
     for (j = 0; j < completedTasks.length; j++) {
       console.log("Found completed task called %s", completedTasks[j].title);
-      if (addCalendarEvent( completedTasks[j].title, completedTasks[j].notes, completedTasks[j].completed )) {
-        deleteTask(taskLists[i].id, completedTasks[j].id);
+      if (addCalendarEvent( completedTasks[j].title, completedTasks[j].notes, completedTasks[j].completed, completedTasks[j].links )) {
+        deleteTask(taskList.id, completedTasks[j].id);
       }
     }
   }
@@ -87,7 +88,8 @@ function getCompletedTasks(listId) {
       id: task.getId(),
       title: task.getTitle(),
       notes: task.getNotes(),
-      completed: task.getCompleted()
+      completed: task.getCompleted(),
+      links: task.getLinks()
     };
   }).filter(function(task) {
     return task.title;
@@ -100,7 +102,18 @@ function getEndOfDays() {
   return formatDate(date);
 }
 
-function addCalendarEvent(title, notes, date) {
+function addCalendarEvent(title, notes, date, links) {
+  if (links) {
+    if (!notes) {
+      notes = "Links:\n";
+    } else {
+      notes = notes + "\n\nLinks:\n"
+    }
+    for (i = 0; i < links.length; i++) {
+      notes = notes + links[i].type + ": " + links[i].link + "\n";
+    }
+  }
+
   var event = {
     start: {
       dateTime: date,
