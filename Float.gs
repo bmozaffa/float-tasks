@@ -1,3 +1,8 @@
+function run() {
+  advanceTasks();
+  removeUnsolicitedEvents();
+}
+
 function advanceTasks() {
   var taskLists = getTaskLists();
   for (i = 0; i < taskLists.length; i++) {
@@ -130,6 +135,43 @@ function addCalendarEvent(title, notes, date, links) {
 
 function deleteTask(taskListId, taskId) {
   Tasks.Tasks.remove(taskListId, taskId);
+}
+
+function removeUnsolicitedEvents() {
+  var events = getUnsolicitedEvents();
+  console.log("Found %s events that should be declined", events.length);
+  for (var i = 0; i < events.length; i++) {
+    var event = events[i];
+    console.log("Will decline \"%s\" created at %s and updated at %s", event.getTitle(), event.getDateCreated(), event.getLastUpdated());
+    event.setMyStatus(CalendarApp.GuestStatus.NO);
+  }
+}
+
+const DAYS_MAX_LOOK_AHEAD = new Date(Date.now() + (14 * 24 * 60 * 60 * 1000));
+
+function getUnsolicitedEvents() {
+  var events = CalendarApp.getEvents(new Date(), DAYS_MAX_LOOK_AHEAD, {max: 200})
+  if (events.length == 0) {
+    console.log("Found no events");
+    return [];
+  }
+  return events.filter(function(event) {
+    return isLargeEvent(event) && hasNotResponded(event) && isNotNewInvite(event);
+  });
+}
+
+function isLargeEvent(event) {
+  return !event.guestsCanSeeGuests();
+}
+
+function hasNotResponded(event) {
+  return event.getMyStatus() == CalendarApp.GuestStatus.INVITED;
+}
+
+const DAYS_GRACE_PERIOD = new Date(Date.now() - (3 * 24 * 60 * 60 * 1000));
+
+function isNotNewInvite(event) {
+  return event.getDateCreated() < DAYS_GRACE_PERIOD;
 }
 
 /**
