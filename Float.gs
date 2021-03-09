@@ -47,7 +47,6 @@ function getOverdueTasks(listId) {
   if (!tasks) {
     return [];
   }
-//  return tasks;
   return tasks.map(function(task) {
     return {
       id: task.getId(),
@@ -147,9 +146,9 @@ function removeUnsolicitedEvents() {
   }
 }
 
-const DAYS_MAX_LOOK_AHEAD = new Date(Date.now() + (14 * 24 * 60 * 60 * 1000));
 
 function getUnsolicitedEvents() {
+  var DAYS_MAX_LOOK_AHEAD = new Date(Date.now() + (14 * 24 * 60 * 60 * 1000));
   var events = CalendarApp.getEvents(new Date(), DAYS_MAX_LOOK_AHEAD, {max: 200})
   if (events.length == 0) {
     console.log("Found no events");
@@ -168,9 +167,8 @@ function hasNotResponded(event) {
   return event.getMyStatus() == CalendarApp.GuestStatus.INVITED;
 }
 
-const DAYS_GRACE_PERIOD = new Date(Date.now() - (3 * 24 * 60 * 60 * 1000));
-
 function isNotNewInvite(event) {
+  var DAYS_GRACE_PERIOD = new Date(Date.now() - (3 * 24 * 60 * 60 * 1000));
   return event.getDateCreated() < DAYS_GRACE_PERIOD;
 }
 
