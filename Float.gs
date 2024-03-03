@@ -168,7 +168,7 @@ function hasNotResponded(event) {
 }
 
 function isNotNewInvite(event) {
-  var DAYS_GRACE_PERIOD = new Date(Date.now() - (3 * 24 * 60 * 60 * 1000));
+  var DAYS_GRACE_PERIOD = new Date(Date.now() - (8 * 60 * 60 * 1000));
   return event.getDateCreated() < DAYS_GRACE_PERIOD;
 }
 
