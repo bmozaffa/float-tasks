@@ -126,6 +126,7 @@ function addCalendarEvent(title, notes, date, links) {
       dateTime: date,
     },
     summary: title,
+    transparency: "transparent",
     description: notes
   };
   Calendar.Events.insert(event, Session.getActiveUser().getEmail());
