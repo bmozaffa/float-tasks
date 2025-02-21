@@ -4,20 +4,20 @@ function run() {
 }
 
 function advanceTasks() {
-  var taskLists = getTaskLists();
-  for (i = 0; i < taskLists.length; i++) {
-    taskList = taskLists[i];
-    console.log('Found task list called %s', taskList.name);
-    overdueTasks = getOverdueTasks(taskList.id);
-    console.info("Found %d overdue tasks", overdueTasks.length);
-    for (j = 0; j < overdueTasks.length; j++) {
+  const taskLists = getTaskLists();
+  for (let i = 0; i < taskLists.length; i++) {
+    const taskList = taskLists[i];
+    console.log(`Found task list called ${taskList.name}`);
+    const overdueTasks = getOverdueTasks(taskList.id);
+    console.log(`Found ${overdueTasks.length} overdue tasks`);
+    for (let j = 0; j < overdueTasks.length; j++) {
       advanceTask(taskList.id, overdueTasks[j].id);
     }
-    completedTasks = getCompletedTasks(taskList.id);
-    console.info("Found %d completed tasks", completedTasks.length);
-    for (j = 0; j < completedTasks.length; j++) {
-      console.log("Found completed task called %s", completedTasks[j].title);
-      if (addCalendarEvent( completedTasks[j].title, completedTasks[j].notes, completedTasks[j].completed, completedTasks[j].links )) {
+    const completedTasks = getCompletedTasks(taskList.id);
+    console.log(`Found ${completedTasks.length} completed tasks`);
+    for (let j = 0; j < completedTasks.length; j++) {
+      console.log(`Found completed task called ${completedTasks[j].title}`);
+      if (addCalendarEvent(completedTasks[j].title, completedTasks[j].notes, completedTasks[j].completed, completedTasks[j].links)) {
         deleteTask(taskList.id, completedTasks[j].id);
       }
     }
@@ -25,84 +25,74 @@ function advanceTasks() {
 }
 
 function getTaskLists() {
-  var taskLists = Tasks.Tasklists.list().getItems();
-  if (!taskLists) {
+  const taskLists = Tasks.Tasklists.list();
+  if (!taskLists || !taskLists.items) {
     return [];
   }
-  return taskLists.map(function(taskList) {
-    return {
-      id: taskList.getId(),
-      name: taskList.getTitle()
-    };
-  });
+  return taskLists.items.map(taskList => ({
+    id: taskList.id,  
+    name: taskList.title,
+  }));
 }
 
 function getOverdueTasks(listId) {
-  var params = {
+  const params = {
     dueMax: formatDate(getToday()),
     showCompleted: false,
-    showDeleted: false
+    showDeleted: false,
   };
-  var tasks = Tasks.Tasks.list(listId, params).getItems();
-  if (!tasks) {
+  const tasks = Tasks.Tasks.list(listId, params);
+  if (!tasks || !tasks.items) {
     return [];
   }
-  return tasks.map(function(task) {
-    return {
-      id: task.getId(),
-      title: task.getTitle(),
-      due: task.getDue()
-    };
-  }).filter(function(task) {
-    return task.title;
-  });
+  return tasks.items.map(task => ({
+    id: task.id,    
+    title: task.title,
+    due: task.due,   
+  })).filter(task => task.title);
 }
 
 function advanceTask(taskListId, taskId) {
-  task = Tasks.Tasks.get(taskListId, taskId);
-  dueDate = new Date(task.due);
-  console.log("Advancing task %s due at %s", task.title, dueDate);
-  while( dueDate < getToday() ) {
-    dueDate.setDate( dueDate.getDate() + 1 );
+  const task = Tasks.Tasks.get(taskListId, taskId);
+  let dueDate = new Date(task.due);
+  console.log(`Advancing task ${task.title} due at ${dueDate}`);
+  while (dueDate < getToday()) {
+    dueDate.setDate(dueDate.getDate() + 1);
   }
-  console.log("Task will now be due at %s", dueDate);
-  task.due = formatDate(dueDate);
-  Tasks.Tasks.update(task, taskListId, taskId)
+  console.log(`Task will now be due at ${dueDate}`);
+  task.due = formatDate(dueDate); // Update the due date
+  Tasks.Tasks.update(task, taskListId, taskId);
 }
 
 function getToday() {
-  var today = new Date();
-  today.setDate(today.getDate()-1);
+  const today = new Date();
+  today.setDate(today.getDate() - 1);
   return today;
 }
 
 function getCompletedTasks(listId) {
-  var params = {
+  const params = {
     showCompleted: true,
     showHidden: true,
     completedMax: getEndOfDays(),
-    showDeleted: false
+    showDeleted: false,
   };
-  var tasks = Tasks.Tasks.list(listId, params).getItems();
-  if (!tasks) {
+  const tasks = Tasks.Tasks.list(listId, params);
+  if (!tasks || !tasks.items) {
     return [];
   }
-  return tasks.map(function(task) {
-    return {
-      id: task.getId(),
-      title: task.getTitle(),
-      notes: task.getNotes(),
-      completed: task.getCompleted(),
-      links: task.getLinks()
-    };
-  }).filter(function(task) {
-    return task.title;
-  });
+  return tasks.items.map(task => ({
+    id: task.id,        
+    title: task.title,   
+    notes: task.notes,    
+    completed: task.completed,
+    links: task.links,     
+  })).filter(task => task.title);
 }
 
 function getEndOfDays() {
-  date = new Date();
-  date.setDate( date.getDate() + (1000 * 365) );
+  const date = new Date();
+  date.setDate(date.getDate() + 365000);
   return formatDate(date);
 }
 
@@ -111,14 +101,14 @@ function addCalendarEvent(title, notes, date, links) {
     if (!notes) {
       notes = "Links:\n";
     } else {
-      notes = notes + "\n\nLinks:\n"
+      notes = notes + "\n\nLinks:\n";
     }
-    for (i = 0; i < links.length; i++) {
+    for (let i = 0; i < links.length; i++) {
       notes = notes + links[i].type + ": " + links[i].link + "\n";
     }
   }
 
-  var event = {
+  const event = {
     start: {
       dateTime: date,
     },
@@ -126,8 +116,8 @@ function addCalendarEvent(title, notes, date, links) {
       dateTime: date,
     },
     summary: title,
-    transparency: "transparent",
-    description: notes
+    transparency: "transparent", // Don't block time
+    description: notes,
   };
   Calendar.Events.insert(event, Session.getActiveUser().getEmail());
   return true;
@@ -138,39 +128,39 @@ function deleteTask(taskListId, taskId) {
 }
 
 function removeUnsolicitedEvents() {
-  var events = getUnsolicitedEvents();
-  console.log("Found %s events that should be declined", events.length);
-  for (var i = 0; i < events.length; i++) {
-    var event = events[i];
-    console.log("Will decline \"%s\" created at %s and updated at %s", event.getTitle(), event.getDateCreated(), event.getLastUpdated());
-    event.setMyStatus(CalendarApp.GuestStatus.NO);
+  const events = getUnsolicitedEvents();
+  console.log(`Found ${events.length} events that should be declined`);
+  for (let i = 0; i < events.length; i++) {
+    const event = events[i];
+    console.log(`Will decline "${event.title}" created at ${event.createdTime} and updated at ${event.updated}`);
+    event.myStatus = CalendarApp.GuestStatus.NO; // Correct way to set status
   }
 }
 
 
 function getUnsolicitedEvents() {
-  var DAYS_MAX_LOOK_AHEAD = new Date(Date.now() + (14 * 24 * 60 * 60 * 1000));
-  var events = CalendarApp.getEvents(new Date(), DAYS_MAX_LOOK_AHEAD, {max: 200})
-  if (events.length == 0) {
+  const DAYS_MAX_LOOK_AHEAD = new Date(Date.now() + (14 * 24 * 60 * 60 * 1000));
+  const events = CalendarApp.getEvents(new Date(), DAYS_MAX_LOOK_AHEAD, { max: 200 });
+  if (events.length === 0) {
     console.log("Found no events");
     return [];
   }
-  return events.filter(function(event) {
-    return isLargeEvent(event) && hasNotResponded(event) && isNotNewInvite(event);
-  });
+  return events.filter(event =>
+      isLargeEvent(event) && hasNotResponded(event) && isNotNewInvite(event)
+  );
 }
 
 function isLargeEvent(event) {
-  return !event.guestsCanSeeGuests();
+  return !event.guestsCanSeeGuests;
 }
 
 function hasNotResponded(event) {
-  return event.getMyStatus() == CalendarApp.GuestStatus.INVITED;
+  return event.myStatus === CalendarApp.GuestStatus.INVITED;
 }
 
 function isNotNewInvite(event) {
-  var DAYS_GRACE_PERIOD = new Date(Date.now() - (8 * 60 * 60 * 1000));
-  return event.getDateCreated() < DAYS_GRACE_PERIOD;
+  const DAYS_GRACE_PERIOD = new Date(Date.now() - (8 * 60 * 60 * 1000));
+  return event.createdTime < DAYS_GRACE_PERIOD;
 }
 
 /**
