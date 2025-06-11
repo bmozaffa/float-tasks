@@ -17,11 +17,17 @@ function advanceTasks() {
     console.log(`Found ${completedTasks.length} completed tasks`);
     for (let j = 0; j < completedTasks.length; j++) {
       console.log(`Found completed task called ${completedTasks[j].title}`);
-      if (addCalendarEvent(completedTasks[j].title, completedTasks[j].notes, completedTasks[j].completed, completedTasks[j].links)) {
+      if (!convertTask( completedTasks[j].notes ) ) {
+        deleteTask(taskList.id, completedTasks[j].id);
+      } else if (addCalendarEvent(completedTasks[j].title, completedTasks[j].notes, completedTasks[j].completed, completedTasks[j].links)) {
         deleteTask(taskList.id, completedTasks[j].id);
       }
     }
   }
+}
+
+function convertTask( notes ) {
+  return !notes || !notes.includes( "#delete" );
 }
 
 function getTaskLists() {
@@ -30,7 +36,7 @@ function getTaskLists() {
     return [];
   }
   return taskLists.items.map(taskList => ({
-    id: taskList.id,  
+    id: taskList.id,
     name: taskList.title,
   }));
 }
@@ -46,9 +52,9 @@ function getOverdueTasks(listId) {
     return [];
   }
   return tasks.items.map(task => ({
-    id: task.id,    
+    id: task.id,
     title: task.title,
-    due: task.due,   
+    due: task.due,
   })).filter(task => task.title);
 }
 
@@ -82,11 +88,11 @@ function getCompletedTasks(listId) {
     return [];
   }
   return tasks.items.map(task => ({
-    id: task.id,        
-    title: task.title,   
-    notes: task.notes,    
+    id: task.id,
+    title: task.title,
+    notes: task.notes,
     completed: task.completed,
-    links: task.links,     
+    links: task.links,
   })).filter(task => task.title);
 }
 
@@ -146,7 +152,7 @@ function getUnsolicitedEvents() {
     return [];
   }
   return events.filter(event =>
-      isLargeEvent(event) && hasNotResponded(event) && isNotNewInvite(event)
+    isLargeEvent(event) && hasNotResponded(event) && isNotNewInvite(event)
   );
 }
 
